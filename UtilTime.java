@@ -1,3 +1,7 @@
+package sa.net.ibtikar.octboot.util;
+
+import android.util.Log;
+
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -40,6 +44,7 @@ public class UtilTime {
         put("^\\d{8}\\s\\d{6}$", "yyyyMMdd HHmmss");
         put("^\\d{1,2}-\\d{1,2}-\\d{4}\\s\\d{1,2}:\\d{2}:\\d{2}$", "dd-MM-yyyy HH:mm:ss");
         put("^\\d{4}-\\d{1,2}-\\d{1,2}\\s\\d{1,2}:\\d{2}:\\d{2}$", "yyyy-MM-dd HH:mm:ss");
+        put("^\\d{4}-\\d{1,2}-\\d{1,2}t\\d{1,2}:\\d{2}:\\d{2}$", "yyyy-MM-dd'T'HH:mm:ss");
         put("^\\d{1,2}/\\d{1,2}/\\d{4}\\s\\d{1,2}:\\d{2}:\\d{2}$", "MM/dd/yyyy HH:mm:ss");
         put("^\\d{4}/\\d{1,2}/\\d{1,2}\\s\\d{1,2}:\\d{2}:\\d{2}$", "yyyy/MM/dd HH:mm:ss");
         put("^\\d{1,2}\\s[a-z]{3}\\s\\d{4}\\s\\d{1,2}:\\d{2}:\\d{2}$", "dd MMM yyyy HH:mm:ss");
@@ -67,7 +72,7 @@ public class UtilTime {
      * @param dateString : the input for date String
      * @return Date object after the string conversion
      */
-    public Date getDateObjectFromDateString(String dateString){
+    public static Date getDateObjectFromDateString(String dateString){
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat(determineDateFormat(dateString));
         try {
             return simpleDateFormat.parse(dateString);
@@ -82,12 +87,41 @@ public class UtilTime {
      * @param dateString : the date string which will be converted to Calendar object
      * @return calendar object after the string conversion
      */
-    public Calendar getCalendarObjectFromDateString(String dateString){
+    public static Calendar getCalendarObjectFromDateString(String dateString){
         Date dateObject = getDateObjectFromDateString(dateString);
         Calendar calendarObject = Calendar.getInstance();
-        calendarObject.setTimeInMillis(dateObject.getTime());
+        calendarObject.setTime(dateObject);
         return calendarObject;
     }
+
+    public static int getHours(Object object){
+        Calendar calendar = Calendar.getInstance();
+
+        if(object instanceof Date){
+            Date dateObject = (Date) object;
+            calendar.setTime(dateObject);
+        }else if(object instanceof Calendar){
+            calendar = (Calendar) object;
+        }else if(object instanceof String){
+            calendar = getCalendarObjectFromDateString((String) object);
+        }
+        return calendar.get(Calendar.HOUR);
+    }
+
+    public static int getMinutes(Object object){
+        Calendar calendar = Calendar.getInstance();
+
+        if(object instanceof Date){
+            Date dateObject = (Date) object;
+            calendar.setTime(dateObject);
+        }else if(object instanceof Calendar){
+            calendar = (Calendar) object;
+        }else if(object instanceof String){
+            calendar = getCalendarObjectFromDateString((String)object);
+        }
+        return calendar.get(Calendar.MINUTE);
+    }
+
 
     /**
      * this method to return time ago which is mostly used in notification center
@@ -145,7 +179,7 @@ public class UtilTime {
         TimeZone gmtTime = TimeZone.getTimeZone("GMT");
         gmtFormat.setTimeZone(gmtTime);
         try {
-
+            Log.d("time in GMT", gmtFormat.format(calendar.getTime()));
             calendar.setTimeZone(TimeZone.getTimeZone("GMT"));
             calendar.setTime(gmtFormat.parse(gmtFormat.format(calendar.getTime())));
         } catch (ParseException e) {
